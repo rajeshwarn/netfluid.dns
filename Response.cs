@@ -70,6 +70,38 @@ namespace Netfluid.Dns
         }
 
         /// <summary>
+        /// With same header of request
+        /// </summary>
+        /// <param name="request"></param>
+        public Response(Request request, Record record)
+        {
+            Header = request.Header;
+            Header.QR = true;
+            Questions = new List<Question>(request);
+            Answers = new List<Record>(new[] { record });
+            Authorities = new List<Record>();
+            Additionals = new List<Record>();
+
+            MessageSize = 0;
+        }
+
+        /// <summary>
+        /// With same header of request
+        /// </summary>
+        /// <param name="request"></param>
+        public Response(Request request, IEnumerable<Record> answers)
+        {
+            Header = request.Header;
+            Header.QR = true;
+            Questions = new List<Question>(request);
+            Answers = answers.ToList();
+            Authorities = new List<Record>();
+            Additionals = new List<Record>();
+
+            MessageSize = 0;
+        }
+
+        /// <summary>
         ///     List of RecordMX in Response.Answers
         /// </summary>
         public Record[] Records
