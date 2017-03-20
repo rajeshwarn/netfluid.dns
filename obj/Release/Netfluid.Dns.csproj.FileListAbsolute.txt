@@ -1,5 +1,0 @@
-D:\PROGETTI\Netfluid.Dns\bin\Release\Netfluid.Dns.dll.config
-D:\PROGETTI\Netfluid.Dns\bin\Release\Netfluid.Dns.dll
-D:\PROGETTI\Netfluid.Dns\bin\Release\Netfluid.Dns.pdb
-D:\PROGETTI\Netfluid.Dns\obj\Release\Netfluid.Dns.dll
-D:\PROGETTI\Netfluid.Dns\obj\Release\Netfluid.Dns.pdb
