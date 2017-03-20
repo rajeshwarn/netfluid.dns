@@ -14,3 +14,5 @@
 /Example/obj/Debug/Example.csprojResolveAssemblyReference.cache
 /Example/obj/Debug/Example.exe
 /Example/obj/Debug/Example.pdb
+/UnitTest/bin
+/UnitTest/obj
