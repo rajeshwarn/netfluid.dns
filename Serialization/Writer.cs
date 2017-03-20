@@ -29,7 +29,7 @@ namespace Netfluid.Dns.Serialization
             return ms.ToArray();
         }
 
-        private static void Serialize(Stream ms, Record rr)
+        public static void Serialize(Stream ms, Record rr)
         {
             WriteDomainName(ms, rr.Name);
             WriteUInt16(ms, (ushort)Enum.Parse(typeof(RecordType), rr.GetType().Name.Substring("Record".Length)));
@@ -82,12 +82,13 @@ namespace Netfluid.Dns.Serialization
 
         public static byte[] Serialize(Request request)
         {
-            var data = new List<byte>();
+            var data = new MemoryStream();
             request.Header.QDCOUNT = (ushort)request.Count;
-            data.AddRange(request.Header.Data);
+
+            Serialize(data, request.Header);
 
             foreach (Question q in request)
-                data.AddRange(Serialize(q));
+                Serialize(data, q);
 
             return data.ToArray();
         }
@@ -97,15 +98,6 @@ namespace Netfluid.Dns.Serialization
             WriteDomainName(ms, q.Name);
             WriteUInt16(ms, (ushort)q.Type);
             WriteUInt16(ms, (ushort)q.Class);
-        }
-
-        public static byte[] Serialize(Question question)
-        {
-            var data = new List<byte>();
-            data.AddRange(WriteName(question.Name));
-            data.AddRange(WriteShort((ushort)question.Type));
-            data.AddRange(WriteShort((ushort)question.Class));
-            return data.ToArray();
         }
 
         private static void WriteUInt16(Stream ms, ushort value)
@@ -118,37 +110,6 @@ namespace Netfluid.Dns.Serialization
             }
             ms.WriteByte((byte)(value & 0xff));
             ms.WriteByte((byte)((value >> 8) & 0xff));
-        }
-
-
-        /// <summary>
-        /// MAY MUST BE MERGED WITH WRITE DOAMIN NAME ?
-        /// </summary>
-        /// <param name="src"></param>
-        /// <returns></returns>
-        private static IEnumerable<byte> WriteName(string src)
-        {
-            if (!src.EndsWith("."))
-                src += ".";
-
-            if (src == ".")
-                return new byte[1];
-
-            var sb = new StringBuilder();
-            int intI, intJ, intLen = src.Length;
-            sb.Append('\0');
-            for (intI = 0, intJ = 0; intI < intLen; intI++, intJ++)
-            {
-                sb.Append(src[intI]);
-
-                if (src[intI] != '.')
-                    continue;
-
-                sb[intI - intJ] = (char)(intJ & 0xff);
-                intJ = -1;
-            }
-            sb[sb.Length - 1] = '\0';
-            return Encoding.ASCII.GetBytes(sb.ToString());
         }
 
         private static IEnumerable<byte> WriteShort(ushort sValue)

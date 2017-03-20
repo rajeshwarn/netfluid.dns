@@ -10,8 +10,6 @@ namespace Netfluid.Dns
 {
     class Serializer
     {
-        #region DESERIALIZE
-
         private static byte ReadByte(Stream stream)
         {
             return (byte) stream.ReadByte();
@@ -276,7 +274,5 @@ namespace Netfluid.Dns
 
             return r;
         }
-
-        #endregion
     }
 }

@@ -159,25 +159,6 @@ namespace Netfluid.Dns.Records
         public ushort QDCOUNT;
 
         /// <summary>
-        ///     Represents the header as a byte array
-        /// </summary>
-        public byte[] Data
-        {
-            get
-            {
-                var data = new List<byte>();
-                data.AddRange(WriteShort(ID));
-                data.AddRange(WriteShort(Flags));
-                data.AddRange(WriteShort(QDCOUNT));
-                data.AddRange(WriteShort(ANCOUNT));
-                data.AddRange(WriteShort(NSCOUNT));
-                data.AddRange(WriteShort(ARCOUNT));
-                return data.ToArray();
-            }
-        }
-
-
-        /// <summary>
         ///     query (false), or a response (true)
         /// </summary>
         public bool QR
@@ -282,11 +263,6 @@ namespace Netfluid.Dns.Records
 
             // shift down to get some value and mask it
             return (ushort) ((oldValue >> position) & mask);
-        }
-
-        private IEnumerable<byte> WriteShort(ushort sValue)
-        {
-            return BitConverter.GetBytes(IPAddress.HostToNetworkOrder((short) sValue));
         }
     }
 }
