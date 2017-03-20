@@ -31,7 +31,7 @@ namespace Netfluid.Dns
         /// <returns></returns>
         public static Response Query(Question question, string server)
         {
-            return Query(question.QName, question.QType, question.QClass, new[] { IPAddress.Parse(server) });
+            return Query(question.Name, question.Type, question.Class, new[] { IPAddress.Parse(server) });
         }
 
         /// <summary>
@@ -42,13 +42,13 @@ namespace Netfluid.Dns
         /// <returns></returns>
         public static Response Query(Question question, IPAddress server)
         {
-            return Query(question.QName, question.QType, question.QClass, new[] { server });
+            return Query(question.Name, question.Type, question.Class, new[] { server });
         }
 
         /// <summary>
         /// Ask a DNS question  to a specific server
         /// </summary>
-        public static Response Query(string name, QType qtype, QClass qclass, string server)
+        public static Response Query(string name, RecordType qtype, Class qclass, string server)
         {
             return Query(name, qtype, qclass, IPAddress.Parse(server));
         }
@@ -56,7 +56,7 @@ namespace Netfluid.Dns
         /// <summary>
         /// Ask a DNS question  to a specific server
         /// </summary>
-        public static Response Query(string name, QType qtype, QClass qclass, IPAddress server)
+        public static Response Query(string name, RecordType qtype, Class qclass, IPAddress server)
         {
             return Query(name, qtype, qclass, new[] { server });
         }
@@ -64,7 +64,7 @@ namespace Netfluid.Dns
         /// <summary>
         /// Ask a DNS question to a specific server
         /// </summary>
-        public static Response Query(string name, QType qtype, QClass qclass = QClass.IN, IEnumerable<IPAddress> servers = null)
+        public static Response Query(string name, RecordType qtype, Class qclass = Class.IN, IEnumerable<IPAddress> servers = null)
         {
             if (servers == null)
                 servers = NetworkDns;
@@ -137,7 +137,7 @@ namespace Netfluid.Dns
         /// <returns></returns>
         public static IEnumerable<string> A(string name)
         {
-            return Query(name, QType.A).Answers.Select(x => x.ToString());
+            return Query(name, RecordType.A).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Netfluid.Dns
         /// <returns></returns>
         public static IEnumerable<string> AAAA(string name)
         {
-            return Query(name, QType.AAAA).Answers.Select(x => x.ToString());
+            return Query(name, RecordType.AAAA).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace Netfluid.Dns
         /// <returns></returns>
         public static IEnumerable<string> CNAME(string name)
         {
-            return Query(name, QType.CNAME).Answers.Select(x => x.ToString());
+            return Query(name, RecordType.CNAME).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace Netfluid.Dns
         /// <returns></returns>
         public static IEnumerable<string> MX(string name)
         {
-            return Query(name, QType.MX).Answers.Select(x => x.ToString());
+            return Query(name, RecordType.MX).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace Netfluid.Dns
         /// <returns></returns>
         public static IEnumerable<string> NS(string name)
         {
-            return Query(name, QType.NS).Answers.Select(x => x.ToString());
+            return Query(name, RecordType.NS).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace Netfluid.Dns
         /// <returns></returns>
         public static IEnumerable<string> PTR(string name)
         {
-            return Query(name, QType.PTR).Answers.Select(x => x.ToString());
+            return Query(name, RecordType.PTR).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace Netfluid.Dns
         /// <returns></returns>
         public static IEnumerable<string> SOA(string name)
         {
-            return Query(name, QType.SOA).Answers.Select(x => x.ToString());
+            return Query(name, RecordType.SOA).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace Netfluid.Dns
         /// <returns></returns>
         public static IEnumerable<string> TXT(string name)
         {
-            return Query(name, QType.TXT).Answers.Select(x => x.ToString());
+            return Query(name, RecordType.TXT).Answers.Select(x => x.ToString());
         }
     }
 }

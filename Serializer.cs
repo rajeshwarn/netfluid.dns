@@ -172,7 +172,7 @@ namespace Netfluid.Dns
 
         private static Question ReadQuestion(MemoryStream stream)
         {
-            return new Question(ReadDomainName(stream), (QType) ReadUInt16(stream), (QClass) ReadUInt16(stream));
+            return new Question(ReadDomainName(stream), (RecordType) ReadUInt16(stream), (Class) ReadUInt16(stream));
         }
 
         public static Request ReadRequest(MemoryStream stream)
@@ -380,9 +380,9 @@ namespace Netfluid.Dns
 
         public static void WriteQuestion(Stream ms, Question q)
         {
-            WriteDomainName(ms, q.QName);
-            WriteUInt16(ms, (ushort) q.QType);
-            WriteUInt16(ms, (ushort) q.QClass);
+            WriteDomainName(ms, q.Name);
+            WriteUInt16(ms, (ushort) q.Type);
+            WriteUInt16(ms, (ushort) q.Class);
         }
 
         private static void WriteRecord(Stream ms, Record rr)

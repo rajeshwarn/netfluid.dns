@@ -27,23 +27,23 @@ namespace Example
             foreach (var question in request)
             {
                 Record record;
-                switch (question.QType)
+                switch (question.Type)
                 {
-                    case QType.A:
+                    case RecordType.A:
                         record = new RecordA("127.0.0.1");
                         break;
 
-                    case QType.AAAA:
+                    case RecordType.AAAA:
                         record = new RecordAAAA("fe80::e1e1:9ccd:7696:17d%7");
                         break;
-                    case QType.MX:
+                    case RecordType.MX:
                         record = new RecordMX
                         {
                             Exchange = "mail.netfluid.org",
                             Preference = 10
                         };
                         break;
-                    case QType.PTR:
+                    case RecordType.PTR:
                         record = new RecordPTR
                         {
                             PtrdName = "127.0.0.1"

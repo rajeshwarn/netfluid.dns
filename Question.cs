@@ -57,17 +57,17 @@ namespace Netfluid.Dns
         /// <summary>
         /// Address class (Internet, CSNET, CHAOS, HESIOD, ANY)
         /// </summary>
-        public QClass QClass;
+        public Class Class;
 
         /// <summary>
         /// Requested records type
         /// </summary>
-        public QType QType;
+        public RecordType Type;
 
         /// <summary>
         /// Domain of the query
         /// </summary>
-        public string QName;
+        public string Name;
 
         /// <summary>
         /// Create a new DNS question
@@ -75,11 +75,11 @@ namespace Netfluid.Dns
         /// <param name="QName"></param>
         /// <param name="QType"></param>
         /// <param name="QClass"></param>
-        public Question(string QName, QType QType, QClass QClass)
+        public Question(string QName, RecordType QType, Class QClass)
         {
-            this.QName = QName;
-            this.QType = QType;
-            this.QClass = QClass;
+            this.Name = QName;
+            this.Type = QType;
+            this.Class = QClass;
         }
 
         /// <summary>
@@ -90,9 +90,9 @@ namespace Netfluid.Dns
             get
             {
                 var data = new List<byte>();
-                data.AddRange(WriteName(QName));
-                data.AddRange(WriteShort((ushort) QType));
-                data.AddRange(WriteShort((ushort) QClass));
+                data.AddRange(WriteName(Name));
+                data.AddRange(WriteShort((ushort) Type));
+                data.AddRange(WriteShort((ushort) Class));
                 return data.ToArray();
             }
         }
@@ -129,7 +129,7 @@ namespace Netfluid.Dns
 
         public override string ToString()
         {
-            return string.Format("{0,-32}\t{1}\t{2}", QName, QClass, QType);
+            return string.Format($"{Name,-32}\t{Class}\t{Type}");
         }
     }
 }

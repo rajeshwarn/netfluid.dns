@@ -88,7 +88,7 @@ namespace Netfluid.Dns
         /// <summary>
         /// Instance a new record from the given type
         /// </summary>
-        /// <param name="type">Record type enum or QType casted</param>
+        /// <param name="type">Record type enum or Type casted</param>
         /// <returns>new record of the given type</returns>
         public static Record FromType(RecordType type)
         {
