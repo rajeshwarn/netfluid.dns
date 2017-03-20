@@ -45,12 +45,12 @@ namespace Netfluid.Dns.Records
         /// </summary>
         public byte D;
 
-        public IPAddress Address()
+        public RecordA()
         {
-             return IPAddress.Parse(ToString());
+
         }
 
-        public void Address(IPAddress value)
+        public RecordA(IPAddress value)
         {
             byte[] arr = value.GetAddressBytes();
             A = arr[0];
@@ -59,18 +59,9 @@ namespace Netfluid.Dns.Records
             D = arr[3];
         }
 
-        public static RecordA Parse(string s)
+        public RecordA(string s):this(IPAddress.Parse(s))
         {
-            var a = new RecordA();
-            a.Address(IPAddress.Parse(s));
-            return a;
-        }
 
-        public static implicit operator RecordA(string s)
-        {
-            var a = new RecordA();
-            a.Address(IPAddress.Parse(s));
-            return a;
         }
 
         public override string ToString()

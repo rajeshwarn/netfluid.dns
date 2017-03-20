@@ -45,7 +45,7 @@ namespace Netfluid.Dns
             TimeLived = 0;
             Name = "netfluid.org";
             Class = Class.IN;
-            TTL = int.MaxValue - 1;
+            TTL = 65536;
         }
 
         /// <summary>

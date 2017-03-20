@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Netfluid.Dns
@@ -13,28 +14,24 @@ namespace Netfluid.Dns
     /// </summary>
     public class DnsServer
     {
-        public static IPAddress[] Roots
+        static Lazy<IPAddress[]> _roots = new Lazy<IPAddress[]>(() => new[]
         {
-            get
-            {
-                return new[]
-                {
-                    IPAddress.Parse("198.41.0.4"),
-                    IPAddress.Parse("192.228.79.201"),
-                    IPAddress.Parse("192.33.4.12"),
-                    IPAddress.Parse("199.7.91.13"),
-                    IPAddress.Parse("192.203.230.10"),
-                    IPAddress.Parse("192.5.5.241"),
-                    IPAddress.Parse("192.112.36.4"),
-                    IPAddress.Parse("128.63.2.53"),
-                    IPAddress.Parse("192.36.148.17"),
-                    IPAddress.Parse("192.58.128.30"),
-                    IPAddress.Parse("193.0.14.129"),
-                    IPAddress.Parse("198.32.64.12"),
-                    IPAddress.Parse("202.12.27.33")
-                };
-            }
-        }
+            IPAddress.Parse("198.41.0.4"),
+            IPAddress.Parse("192.228.79.201"),
+            IPAddress.Parse("192.33.4.12"),
+            IPAddress.Parse("199.7.91.13"),
+            IPAddress.Parse("192.203.230.10"),
+            IPAddress.Parse("192.5.5.241"),
+            IPAddress.Parse("192.112.36.4"),
+            IPAddress.Parse("128.63.2.53"),
+            IPAddress.Parse("192.36.148.17"),
+            IPAddress.Parse("192.58.128.30"),
+            IPAddress.Parse("193.0.14.129"),
+            IPAddress.Parse("198.32.64.12"),
+            IPAddress.Parse("202.12.27.33")
+        });
+
+        public static IPAddress[] Roots => _roots.Value;
 
         /// <summary>
         /// True if DNS Server is running
@@ -51,8 +48,9 @@ namespace Netfluid.Dns
         /// </summary>
         public bool Recursive;
 
-        IPEndPoint endPoint;
-        UdpClient c;
+        CancellationTokenSource stopper;
+        UdpClient endpoint;
+        Task task;
 
         public DnsServer():this(IPAddress.Any)
         {
@@ -60,43 +58,33 @@ namespace Netfluid.Dns
 
         public DnsServer(IPAddress ip, int port=53)
         {
-            endPoint = new IPEndPoint(ip, port);
-            c = new UdpClient(endPoint);
-        }
+            endpoint = new UdpClient(new IPEndPoint(ip, port));
+            stopper = new CancellationTokenSource();
+            
 
-        /// <summary>
-        /// Start syncronosly accepting requests
-        /// </summary>
-        public void Start()
-        {
-            AcceptingRequest = true;
-
-            if (OnRequest == null) throw new ArgumentNullException("Assign the OnRequest handler before start the server");
-
-            while (AcceptingRequest)
+            task = new Task(async () =>
             {
-                try
+                while (true)
                 {
-                    var buffer = c.Receive(ref endPoint);
+                    var client = await endpoint.ReceiveAsync();
 
-                    var req = Serializer.ReadRequest(new MemoryStream(buffer));
+                    Task.Run(() =>
+                    {
+                        if (OnRequest == null) return;
 
-                    if (OnRequest == null)
-                        continue;
+                        var req  = Serializer.ReadRequest(new MemoryStream(client.Buffer));
+                        var resp = OnRequest(req);
 
-                    var resp = OnRequest(req);
+                        if (Recursive && resp.Answers.Count == 0 && resp.Authorities.Count == 0 && resp.Additionals.Count == 0)
+                            resp = DnsClient.Query(req, Roots);
 
-                    if(Recursive && resp.Answers.Count == 0 && resp.Authorities.Count==0 && resp.Additionals.Count==0)
-                        resp = DnsClient.Query(req, Roots);
-
-                    var r = Serializer.WriteResponse(resp);
-                    c.Send(r, r.Length, endPoint);
+                        var output = Serializer.WriteResponse(resp);
+                        endpoint.SendAsync(output, output.Length, client.RemoteEndPoint);
+                    });
                 }
-                catch (Exception)
-                {
-                    
-                }
-            }
+
+
+            }, stopper.Token);
         }
 
         /// <summary>
@@ -105,7 +93,7 @@ namespace Netfluid.Dns
         /// <param name="ip"></param>
         public void StartAsync()
         {
-            Task.Factory.StartNew(() =>Start());
+            task.Start();
         }
 
         /// <summary>
@@ -113,7 +101,7 @@ namespace Netfluid.Dns
         /// </summary>
         public void Stop()
         {
-            AcceptingRequest = false;
+            stopper.Cancel();
         }
     }
 }

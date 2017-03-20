@@ -1,6 +1,6 @@
 ﻿using Netfluid.Dns;
 using Netfluid.Dns.Records;
-using System.Linq;
+using System;
 
 namespace Example
 {
@@ -15,24 +15,41 @@ namespace Example
             //If he doens't have the answer it will ask to upper dns server for solving the question
             server.Recursive = true;
             server.OnRequest = OnRequest;
-            server.Start();
+            server.StartAsync();
+
+            Console.ReadLine();
         }
 
-        private static Response OnRequest(Request req)
+        private static Response OnRequest(Request request)
         {
-            var questions = req.Where(x => x.QName.EndsWith("netfluid.org") && x.QType == QType.MX);
+            var response = new Response(request);
 
-            if (!questions.Any())
-                return new Response();
-
-            return new Response(req, new RecordMX()
+            foreach (var question in request)
             {
-                Name ="netfluid.org",
-                Exchange = "178.23.169.22",
-                Class = Class.IN,
-                Preference = 10,
-                TTL = 127
-            });
+                Record record;
+                switch (question.QType)
+                {
+                    case QType.A:
+                        record = new RecordA("127.0.0.1");
+                        break;
+
+                    case QType.AAAA:
+                        record = new RecordAAAA("fe80::e1e1:9ccd:7696:17d%7");
+                        break;
+                    case QType.MX:
+                        record = new RecordMX
+                        {
+                            Exchange = "mail.netfluid.org",
+                            Preference = 10
+                        };
+                        break;
+                    default:
+                        throw new NotImplementedException("Add other record types to this example !!!");
+                }
+
+                response.Answers.Add(record);
+            }
+            return response;
         }
     }
 }
