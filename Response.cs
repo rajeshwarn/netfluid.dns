@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Netfluid.Dns.Records;
@@ -9,7 +10,7 @@ namespace Netfluid.Dns
     /// List of returned DNS record used by DNS server and resolver
     /// </summary>
     [Serializable]
-    public class Response
+    public class Response : IEnumerable<Record>
     {
         /// <summary>
         ///     List of Record records
@@ -34,14 +35,14 @@ namespace Netfluid.Dns
         /// <summary>
         ///     The Size of the message
         /// </summary>
-        public int MessageSize;
+        internal int MessageSize;
 
         /// <summary>
         ///     List of Question records
         /// </summary>
         public List<Question> Questions;
 
-        public Response()
+        internal Response()
         {
             Questions = new List<Question>();
             Answers = new List<Record>();
@@ -101,9 +102,14 @@ namespace Netfluid.Dns
             MessageSize = 0;
         }
 
-        public Record[] AllRecords
+        public IEnumerator<Record> GetEnumerator()
         {
-            get { return Answers.Concat(Authorities.Concat(Additionals)).ToArray(); }
+            return (Answers.Concat(Authorities.Concat(Additionals))).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return (Answers.Concat(Authorities.Concat(Additionals))).GetEnumerator();
         }
     }
 }

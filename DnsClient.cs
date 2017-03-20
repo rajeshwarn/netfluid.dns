@@ -13,15 +13,10 @@ namespace Netfluid.Dns
         ///     Gets a list of default DNS servers used by system
         /// </summary>
         /// <returns></returns>
-        public static IPAddress[] NetworkDns
-        {
-            get
-            {
-                var adapters =
-                    NetworkInterface.GetAllNetworkInterfaces().Where(x => x.OperationalStatus == OperationalStatus.Up);
-                return adapters.SelectMany(x => x.GetIPProperties().DnsAddresses).ToArray();
-            }
-        }
+        public static IPAddress[] NetworkServers => NetworkInterface.GetAllNetworkInterfaces()
+                                                                .Where(x => x.OperationalStatus == OperationalStatus.Up)
+                                                                .SelectMany(x => x.GetIPProperties().DnsAddresses)
+                                                                .ToArray();
 
         /// <summary>
         /// Ask a DNS question to the specified server
@@ -67,7 +62,7 @@ namespace Netfluid.Dns
         public static Response Query(string name, RecordType qtype, Class qclass = Class.IN, IEnumerable<IPAddress> servers = null)
         {
             if (servers == null)
-                servers = NetworkDns;
+                servers = NetworkServers;
 
             var request = new Request { new Question(name, qtype, qclass) };
 
@@ -118,7 +113,7 @@ namespace Netfluid.Dns
                     c.Send(requestByte, requestByte.Length, endPoint);
 
                     var resp = Serializer.ReadResponse(c.Receive(ref endPoint));
-                    if (resp.AllRecords.Length > 0)
+                    if (resp.Any())
                     {
                         return resp;
                     }
