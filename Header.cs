@@ -243,7 +243,7 @@ namespace Netfluid.Dns.Records
         /// <summary>
         ///     Response code
         /// </summary>
-        public RCode RCODE
+        public RCode RCode
         {
             get { return (RCode) GetBits(Flags, 0, 4); }
             set { Flags = SetBits(Flags, 0, 4, (ushort) value); }
