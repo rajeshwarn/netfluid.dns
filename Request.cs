@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Netfluid.Dns.Records;
+using Netfluid.Dns.Serialization;
 
 namespace Netfluid.Dns
 {
@@ -21,24 +22,6 @@ namespace Netfluid.Dns
         public Request()
         {
             Header = new Header {OPCODE = OpCode.Query, QDCOUNT = 0, RD = true, ID = (ushort) DateTime.Now.Millisecond};
-        }
-
-        /// <summary>
-        /// Binary seriliazed
-        /// </summary>
-        internal byte[] Write
-        {
-            get
-            {
-                var data = new List<byte>();
-                Header.QDCOUNT = (ushort) Count;
-                data.AddRange(Header.Data);
-
-                foreach (Question q in this)
-                    data.AddRange(q.Data);
-
-                return data.ToArray();
-            }
         }
     }
 }

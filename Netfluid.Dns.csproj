@@ -49,7 +49,7 @@
     <Compile Include="Class.cs" />
     <Compile Include="DnsClient.cs" />
     <Compile Include="DnsServer.cs" />
-    <Compile Include="OpCode.cs" />
+    <Compile Include="Internals\OpCode.cs" />
     <Compile Include="RecordType.cs" />
     <Compile Include="ResponseCode.cs" />
     <Compile Include="Serialization\DomainNameAttribute.cs" />
@@ -121,6 +121,7 @@
     <Compile Include="Request.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="Serialization\Serializer.cs" />
+    <Compile Include="Serialization\Writer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

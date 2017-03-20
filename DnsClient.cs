@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Netfluid.Dns.Serialization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Netfluid.Dns
 {
@@ -24,9 +25,9 @@ namespace Netfluid.Dns
         /// <param name="question">Question</param>
         /// <param name="server">Server</param>
         /// <returns></returns>
-        public static Response Query(Question question, string server)
+        public static async Task<Response> Query(Question question, string server)
         {
-            return Query(question.Name, question.Type, question.Class, new[] { IPAddress.Parse(server) });
+            return await Query(question.Name, question.Type, question.Class, new[] { IPAddress.Parse(server) });
         }
 
         /// <summary>
@@ -35,91 +36,62 @@ namespace Netfluid.Dns
         /// <param name="question">Question</param>
         /// <param name="server">Server</param>
         /// <returns></returns>
-        public static Response Query(Question question, IPAddress server)
+        public static async Task<Response> Query(Question question, IPAddress server)
         {
-            return Query(question.Name, question.Type, question.Class, new[] { server });
+            return await Query(question.Name, question.Type, question.Class, new[] { server });
         }
 
         /// <summary>
         /// Ask a DNS question  to a specific server
         /// </summary>
-        public static Response Query(string name, RecordType qtype, Class qclass, string server)
+        public static async Task<Response> Query(string name, RecordType qtype, Class qclass, string server)
         {
-            return Query(name, qtype, qclass, IPAddress.Parse(server));
+            return await Query(name, qtype, qclass, IPAddress.Parse(server));
         }
 
         /// <summary>
         /// Ask a DNS question  to a specific server
         /// </summary>
-        public static Response Query(string name, RecordType qtype, Class qclass, IPAddress server)
+        public static async Task<Response> Query(string name, RecordType qtype, Class qclass, IPAddress server)
         {
-            return Query(name, qtype, qclass, new[] { server });
+            return await Query(name, qtype, qclass, new[] { server });
         }
 
         /// <summary>
         /// Ask a DNS question to a specific server
         /// </summary>
-        public static Response Query(string name, RecordType qtype, Class qclass = Class.IN, IEnumerable<IPAddress> servers = null)
+        public static async Task<Response> Query(string name, RecordType qtype, Class qclass = Class.IN, IEnumerable<IPAddress> servers = null)
         {
             if (servers == null)
                 servers = NetworkServers;
 
             var request = new Request { new Question(name, qtype, qclass) };
 
-            return Query(request, servers);
+            return await Query(request, servers);
         }
 
-        public static Response Query(Request request, IEnumerable<IPAddress> servers)
+        public static async Task<Response> Query(Request request, IEnumerable<IPAddress> servers)
         {
-            var requestByte = request.Write;
+            var requestByte = Writer.Serialize(request);
             var buffer = new byte[32 * 1024];
+
+            var client = new UdpClient();
 
             for (int intAttempts = 0; intAttempts < 3; intAttempts++)
             {
                 foreach (var server in servers)
                 {
-                    Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                    socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 1000);
-
                     try
                     {
-                        socket.SendTo(requestByte, new IPEndPoint(server, 53));
-                        int size = socket.Receive(buffer);
-                        var rbyte = new byte[size];
-                        Array.Copy(buffer, rbyte, size);
+                        await client.SendAsync(requestByte, requestByte.Length, new IPEndPoint(server, 53));
+                        var response = await client.ReceiveAsync();
 
-                        var resp = Serializer.ReadResponse(rbyte);
-                        return resp;
+                        return Serializer.ReadResponse(response.Buffer);
                     }
                     catch (SocketException)
                     {
                         continue; // next try
                     }
-                    finally
-                    {
-                        socket.Close();
-                    }
-                }
-            }
-
-
-            foreach (var ip in servers)
-            {
-                var endPoint = new IPEndPoint(ip, 53);
-
-                try
-                {
-                    var c = new UdpClient { Client = { ReceiveTimeout = 1000, SendTimeout = 1000 } };
-                    c.Send(requestByte, requestByte.Length, endPoint);
-
-                    var resp = Serializer.ReadResponse(c.Receive(ref endPoint));
-                    if (resp.Any())
-                    {
-                        return resp;
-                    }
-                }
-                catch (SocketException)
-                {
                 }
             }
             return new Response();
@@ -130,9 +102,9 @@ namespace Netfluid.Dns
         /// </summary>
         /// <param name="name">domain to query</param>
         /// <returns></returns>
-        public static IEnumerable<string> A(string name)
+        public static async Task<IEnumerable<string>> A(string name)
         {
-            return Query(name, RecordType.A).Answers.Select(x => x.ToString());
+            return (await Query(name, RecordType.A)).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -140,9 +112,9 @@ namespace Netfluid.Dns
         /// </summary>
         /// <param name="name">domain to query</param>
         /// <returns></returns>
-        public static IEnumerable<string> AAAA(string name)
+        public static async Task<IEnumerable<string>> AAAA(string name)
         {
-            return Query(name, RecordType.AAAA).Answers.Select(x => x.ToString());
+            return (await Query(name, RecordType.AAAA)).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -150,9 +122,9 @@ namespace Netfluid.Dns
         /// </summary>
         /// <param name="name">domain to query</param>
         /// <returns></returns>
-        public static IEnumerable<string> CNAME(string name)
+        public static async Task<IEnumerable<string>> CNAME(string name)
         {
-            return Query(name, RecordType.CNAME).Answers.Select(x => x.ToString());
+            return (await Query(name, RecordType.CNAME)).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -160,9 +132,9 @@ namespace Netfluid.Dns
         /// </summary>
         /// <param name="name">domain to query</param>
         /// <returns></returns>
-        public static IEnumerable<string> MX(string name)
+        public static async Task<IEnumerable<string>> MX(string name)
         {
-            return Query(name, RecordType.MX).Answers.Select(x => x.ToString());
+            return (await Query(name, RecordType.MX)).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -170,9 +142,9 @@ namespace Netfluid.Dns
         /// </summary>
         /// <param name="name">domain to query</param>
         /// <returns></returns>
-        public static IEnumerable<string> NS(string name)
+        public static async Task<IEnumerable<string>> NS(string name)
         {
-            return Query(name, RecordType.NS).Answers.Select(x => x.ToString());
+            return (await Query(name, RecordType.NS)).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -180,9 +152,9 @@ namespace Netfluid.Dns
         /// </summary>
         /// <param name="name">domain to query</param>
         /// <returns></returns>
-        public static IEnumerable<string> PTR(string name)
+        public static async Task<IEnumerable<string>> PTR(string name)
         {
-            return Query(name, RecordType.PTR).Answers.Select(x => x.ToString());
+            return (await Query(name, RecordType.PTR)).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -190,9 +162,9 @@ namespace Netfluid.Dns
         /// </summary>
         /// <param name="name">domain to query</param>
         /// <returns></returns>
-        public static IEnumerable<string> SOA(string name)
+        public static async Task<IEnumerable<string>> SOA(string name)
         {
-            return Query(name, RecordType.SOA).Answers.Select(x => x.ToString());
+            return (await Query(name, RecordType.SOA)).Answers.Select(x => x.ToString());
         }
 
         /// <summary>
@@ -200,9 +172,9 @@ namespace Netfluid.Dns
         /// </summary>
         /// <param name="name">domain to query</param>
         /// <returns></returns>
-        public static IEnumerable<string> TXT(string name)
+        public static async Task<IEnumerable<string>> TXT(string name)
         {
-            return Query(name, RecordType.TXT).Answers.Select(x => x.ToString());
+            return (await Query(name, RecordType.TXT)).Answers.Select(x => x.ToString());
         }
     }
 }

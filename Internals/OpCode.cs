@@ -26,7 +26,7 @@ OPCODE          A four bit field that specifies kind of query in this
     /// DNS protocol query code
     /// </summary>
     [Serializable]
-    public enum OpCode
+    internal enum OpCode
     {
         Query = 0, // a standard query (QUERY)
         IQUERY = 1, // OpCode Retired (previously IQUERY - No further [RFC3425]
