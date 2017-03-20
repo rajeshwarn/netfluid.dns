@@ -54,7 +54,7 @@ namespace Netfluid.Dns
         /// <summary>
         /// Address class (Internet, CSNET, CHAOS, HESIOD, ANY)
         /// </summary>
-        public Class Class;
+        public RecordClass Class;
 
         /// <summary>
         /// Requested records type
@@ -72,7 +72,7 @@ namespace Netfluid.Dns
         /// <param name="name"></param>
         /// <param name="type"></param>
         /// <param name="qclass"></param>
-        public Question(string name, RecordType type, Class qclass)
+        public Question(string name, RecordType type, RecordClass qclass)
         {
             Name = name;
             Type = type;

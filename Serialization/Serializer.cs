@@ -24,20 +24,13 @@ namespace Netfluid.Dns
 
         private static uint ReadUInt32(Stream ms)
         {
-            uint res;
-
             if (BitConverter.IsLittleEndian)
             {
-                res = (((uint) ReadByte(ms) << 24) | ((uint) ReadByte(ms) << 16) |
+                return (((uint) ReadByte(ms) << 24) | ((uint) ReadByte(ms) << 16) |
                        ((uint) ReadByte(ms) << 8) | ReadByte(ms));
             }
-            else
-            {
-                res = (ReadByte(ms) | ((uint) ReadByte(ms) << 8) |
-                       ((uint) ReadByte(ms) << 16) | ((uint) ReadByte(ms) << 24));
-            }
 
-            return res;
+            return (ReadByte(ms) | ((uint)ReadByte(ms) << 8) | ((uint)ReadByte(ms) << 16) | ((uint)ReadByte(ms) << 24));
         }
 
         private static int ReadInt32(Stream ms)
@@ -172,7 +165,7 @@ namespace Netfluid.Dns
 
         private static Question ReadQuestion(MemoryStream stream)
         {
-            return new Question(ReadDomainName(stream), (RecordType) ReadUInt16(stream), (Class) ReadUInt16(stream));
+            return new Question(ReadDomainName(stream), (RecordType) ReadUInt16(stream), (RecordClass) ReadUInt16(stream));
         }
 
         public static Request ReadRequest(MemoryStream stream)
@@ -191,7 +184,7 @@ namespace Netfluid.Dns
             const int timeLived = 0;
             string name = ReadDomainName(ms);
             var recordType = (RecordType) ReadUInt16(ms);
-            var @class = (Class) ReadUInt16(ms);
+            var @class = (RecordClass) ReadUInt16(ms);
             uint ttl = ReadUInt32(ms);
             ushort rdlength = ReadUInt16(ms);
 
@@ -285,164 +278,5 @@ namespace Netfluid.Dns
         }
 
         #endregion
-
-        private static void WriteUInt16(Stream ms, ushort value)
-        {
-            if (BitConverter.IsLittleEndian)
-            {
-                ms.WriteByte((byte) ((value >> 8) & 0xff));
-                ms.WriteByte((byte) (value & 0xff));
-            }
-            else
-            {
-                ms.WriteByte((byte) (value & 0xff));
-                ms.WriteByte((byte) ((value >> 8) & 0xff));
-            }
-        }
-
-        private static void WriteInt32(Stream ms, int value)
-        {
-            if (BitConverter.IsLittleEndian)
-            {
-                ms.WriteByte((byte) ((value >> 24) & 0xff));
-                ms.WriteByte((byte) ((value >> 16) & 0xff));
-                ms.WriteByte((byte) ((value >> 8) & 0xff));
-                ms.WriteByte((byte) (value & 0xff));
-            }
-            else
-            {
-                ms.WriteByte((byte) (value & 0xff));
-                ms.WriteByte((byte) ((value >> 8) & 0xff));
-                ms.WriteByte((byte) ((value >> 16) & 0xff));
-                ms.WriteByte((byte) ((value >> 24) & 0xff));
-            }
-        }
-
-        private static void WriteUInt32(Stream ms, uint value)
-        {
-            if (BitConverter.IsLittleEndian)
-            {
-                ms.WriteByte((byte) ((value >> 24) & 0xff));
-                ms.WriteByte((byte) ((value >> 16) & 0xff));
-                ms.WriteByte((byte) ((value >> 8) & 0xff));
-                ms.WriteByte((byte) (value & 0xff));
-            }
-            else
-            {
-                ms.WriteByte((byte) (value & 0xff));
-                ms.WriteByte((byte) ((value >> 8) & 0xff));
-                ms.WriteByte((byte) ((value >> 16) & 0xff));
-                ms.WriteByte((byte) ((value >> 24) & 0xff));
-            }
-        }
-
-        private static void WriteByteArray(Stream ms, byte[] value)
-        {
-            ms.Write(value, 0, value.Length);
-        }
-
-        private static void WriteDomainName(Stream ms, string name)
-        {
-            while (true)
-            {
-                if (String.IsNullOrEmpty(name) || (name == "."))
-                {
-                    ms.WriteByte(0);
-                    return;
-                }
-
-                int labelLength = name.IndexOf('.');
-                if (labelLength == -1)
-                    labelLength = name.Length;
-
-                ms.WriteByte((byte) labelLength);
-                WriteByteArray(ms, Encoding.ASCII.GetBytes(name.ToCharArray(0, labelLength)));
-
-                name = labelLength == name.Length ? "." : name.Substring(labelLength + 1);
-            }
-        }
-
-        public static void WriteText(Stream ms, string name)
-        {
-            byte[] d = Encoding.ASCII.GetBytes(name);
-            ms.Write(d, 0, d.Length);
-        }
-
-        private static void WriteHeader(Stream ms, Header header)
-        {
-            WriteUInt16(ms, header.ID);
-            WriteUInt16(ms, header.Flags);
-            WriteUInt16(ms, header.QDCOUNT);
-            WriteUInt16(ms, header.ANCOUNT);
-            WriteUInt16(ms, header.NSCOUNT);
-            WriteUInt16(ms, header.ARCOUNT);
-        }
-
-        public static void WriteQuestion(Stream ms, Question q)
-        {
-            WriteDomainName(ms, q.Name);
-            WriteUInt16(ms, (ushort) q.Type);
-            WriteUInt16(ms, (ushort) q.Class);
-        }
-
-        private static void WriteRecord(Stream ms, Record rr)
-        {
-            WriteDomainName(ms, rr.Name);
-            WriteUInt16(ms, (ushort) Enum.Parse(typeof (RecordType), rr.GetType().Name.Substring("Record".Length)));
-            WriteUInt16(ms, (ushort) rr.Class);
-            WriteUInt32(ms, rr.TTL);
-
-            var n = new MemoryStream();
-            WriteRecordData(n, rr);
-            WriteUInt16(ms, (ushort) n.Length);
-            WriteByteArray(ms, n.ToArray());
-        }
-
-        private static void WriteRecordData(Stream ms, Record record)
-        {
-            var type = record.GetType();
-            foreach (var field in type.GetFields().Where(x => x.DeclaringType == type))
-            {
-                var fieldType = field.FieldType;
-                var value = field.GetValue(record);
-
-                if (fieldType == typeof (byte))
-                    ms.WriteByte((byte) value);
-                else if (fieldType == typeof (ushort))
-                    WriteUInt16(ms, (ushort) value);
-                else if (fieldType == typeof (int))
-                    WriteInt32(ms, (int) value);
-                else if (fieldType == typeof (uint))
-                    WriteUInt32(ms, (uint) value);
-                else if (fieldType == typeof (byte[]))
-                    WriteByteArray(ms, (byte[]) value);
-                else if (fieldType == typeof (string))
-                {
-                    if (field.HasAttribute<DomainNameAttribute>())
-                        WriteDomainName(ms, (string) value);
-                    else
-                        WriteText(ms, (string) value);
-                }
-            }
-        }
-
-        public static byte[] WriteResponse(Response response)
-        {
-            var ms = new MemoryStream();
-
-            response.Header.QDCOUNT = (ushort) response.Questions.Count;
-            response.Header.ANCOUNT = (ushort) response.Answers.Count;
-            response.Header.NSCOUNT = (ushort) response.Authorities.Count;
-            response.Header.ARCOUNT = (ushort) response.Additionals.Count;
-
-            WriteHeader(ms, response.Header);
-
-            response.Questions.ForEach(x => WriteQuestion(ms, x));
-            response.Answers.ForEach(x => WriteRecord(ms, x));
-            response.Authorities.ForEach(x => WriteRecord(ms, x));
-            response.Additionals.ForEach(x => WriteRecord(ms, x));
-
-            return ms.ToArray();
-        }
     }
 }

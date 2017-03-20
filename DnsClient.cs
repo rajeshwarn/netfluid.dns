@@ -44,7 +44,7 @@ namespace Netfluid.Dns
         /// <summary>
         /// Ask a DNS question  to a specific server
         /// </summary>
-        public static async Task<Response> Query(string name, RecordType qtype, Class qclass, string server)
+        public static async Task<Response> Query(string name, RecordType qtype, RecordClass qclass, string server)
         {
             return await Query(name, qtype, qclass, IPAddress.Parse(server));
         }
@@ -52,7 +52,7 @@ namespace Netfluid.Dns
         /// <summary>
         /// Ask a DNS question  to a specific server
         /// </summary>
-        public static async Task<Response> Query(string name, RecordType qtype, Class qclass, IPAddress server)
+        public static async Task<Response> Query(string name, RecordType qtype, RecordClass qclass, IPAddress server)
         {
             return await Query(name, qtype, qclass, new[] { server });
         }
@@ -60,7 +60,7 @@ namespace Netfluid.Dns
         /// <summary>
         /// Ask a DNS question to a specific server
         /// </summary>
-        public static async Task<Response> Query(string name, RecordType qtype, Class qclass = Class.IN, IEnumerable<IPAddress> servers = null)
+        public static async Task<Response> Query(string name, RecordType qtype, RecordClass qclass = RecordClass.IN, IEnumerable<IPAddress> servers = null)
         {
             if (servers == null)
                 servers = NetworkServers;

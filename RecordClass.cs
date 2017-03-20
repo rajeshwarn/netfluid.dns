@@ -21,7 +21,7 @@ namespace Netfluid.Dns
     /// DNS protocol address class
     /// </summary>
     [Serializable]
-    public enum Class : ushort
+    public enum RecordClass : ushort
     {
         IN = 1, // the Internet
         CS = 2, // the CSNET class (Obsolete - used only for examples in some obsolete RFCs)

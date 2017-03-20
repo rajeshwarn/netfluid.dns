@@ -23,7 +23,7 @@ namespace Netfluid.Dns
         /// <summary>
         ///     Specifies type class of resource record, mostly IN but can be CS, CH or HS
         /// </summary>
-        public Class Class;
+        public RecordClass Class;
 
         /// <summary>
         /// The name of the node to which this resource record pertains
@@ -42,7 +42,7 @@ namespace Netfluid.Dns
         {
             TimeLived = 0;
             Name = "netfluid.org";
-            Class = Class.IN;
+            Class = RecordClass.IN;
             TTL = 65536;
         }
 

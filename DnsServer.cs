@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Netfluid.Dns.Serialization;
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -68,17 +69,17 @@ namespace Netfluid.Dns
                 {
                     var client = await endpoint.ReceiveAsync();
 
-                    Task.Run(() =>
+                    Task.Run(async () =>
                     {
                         if (OnRequest == null) return;
 
-                        var req  = Serializer.ReadRequest(new MemoryStream(client.Buffer));
+                        var req = Serializer.ReadRequest(new MemoryStream(client.Buffer));
                         var resp = OnRequest(req);
 
                         if (Recursive && resp.Answers.Count == 0 && resp.Authorities.Count == 0 && resp.Additionals.Count == 0)
-                            resp = DnsClient.Query(req, Roots);
+                            resp = await DnsClient.Query(req, Roots);
 
-                        var output = Serializer.WriteResponse(resp);
+                        var output = Writer.Serialize(resp);
                         endpoint.SendAsync(output, output.Length, client.RemoteEndPoint);
                     });
                 }
