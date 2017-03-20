@@ -43,6 +43,12 @@ namespace Example
                             Preference = 10
                         };
                         break;
+                    case QType.PTR:
+                        record = new RecordPTR
+                        {
+                            PtrdName = "127.0.0.1"
+                        };
+                        break;
                     default:
                         throw new NotImplementedException("Add other record types to this example !!!");
                 }

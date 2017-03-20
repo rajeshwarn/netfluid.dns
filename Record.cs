@@ -54,14 +54,7 @@ namespace Netfluid.Dns
         /// <summary>
         /// Return the type of this record as RecordType enum
         /// </summary>
-        public RecordType RecordType
-        {
-            get
-            {
-                var r = (RecordType)Enum.Parse(typeof(RecordType), this.GetType().Name.Substring("Record".Length));
-                return r;
-            }
-        }
+        public RecordType RecordType => (RecordType)Enum.Parse(typeof(RecordType), this.GetType().Name.Substring("Record".Length)); 
 
         /// <summary>
         /// Zone parts of the domain (www.example.com, .example.com, .com)

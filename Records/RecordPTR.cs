@@ -27,11 +27,11 @@ namespace Netfluid.Dns.Records
         [Serializable]
     public class RecordPTR : Record
     {
-        [DomainName] public string PTRDNAME;
+        [DomainName] public string PtrdName;
 
         public override string ToString()
         {
-            return PTRDNAME;
+            return PtrdName;
         }
     }
 }
