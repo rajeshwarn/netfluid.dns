@@ -72,14 +72,14 @@ namespace Netfluid.Dns
         /// <summary>
         /// Create a new DNS question
         /// </summary>
-        /// <param name="QName"></param>
-        /// <param name="QType"></param>
-        /// <param name="QClass"></param>
-        public Question(string QName, RecordType QType, Class QClass)
+        /// <param name="name"></param>
+        /// <param name="type"></param>
+        /// <param name="qclass"></param>
+        public Question(string name, RecordType type, Class qclass)
         {
-            this.Name = QName;
-            this.Type = QType;
-            this.Class = QClass;
+            this.Name = name;
+            this.Type = type;
+            this.Class = qclass;
         }
 
         /// <summary>

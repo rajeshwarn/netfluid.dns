@@ -48,7 +48,7 @@
   <ItemGroup>
     <Compile Include="DnsClient.cs" />
     <Compile Include="DnsServer.cs" />
-    <Compile Include="DomainNameAttribute.cs" />
+    <Compile Include="Serialization\DomainNameAttribute.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Header.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
