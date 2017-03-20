@@ -30,14 +30,6 @@ namespace Netfluid.Dns
 {
     internal static class Extensions
     {
-
-        #region IP ADDRESS
-
-        private static readonly IPAddress _ipv4MulticastNetworkAddress = IPAddress.Parse("224.0.0.0");
-        private static readonly IPAddress _ipv6MulticastNetworkAddress = IPAddress.Parse("FF00::");
-
-        #endregion
-
         #region BYTE ARRAY
 
         public static string ToBase64(this byte[] array)

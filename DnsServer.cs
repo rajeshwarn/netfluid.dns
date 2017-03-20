@@ -45,6 +45,11 @@ namespace Netfluid.Dns
         public Func<Request, Response> OnRequest { get; set; }
 
         /// <summary>
+        /// Invoked when a recursive response was recieved from roots servers
+        /// </summary>
+        public event Action<Request, Response> OnRecursive;
+
+        /// <summary>
         /// If true when a local server response is empty it will hask to roots servers
         /// </summary>
         public bool Recursive { get; set; }
@@ -67,21 +72,27 @@ namespace Netfluid.Dns
             {
                 while (true)
                 {
-                    var client = await endpoint.ReceiveAsync();
-
-                    Task.Run(async () =>
+                    try
                     {
+                        var client = await endpoint.ReceiveAsync();
+
                         if (OnRequest == null) return;
 
-                        var req = Serializer.ReadRequest(new MemoryStream(client.Buffer));
+                        var req = Reader.ReadRequest(new MemoryStream(client.Buffer));
                         var resp = OnRequest(req);
 
                         if (Recursive && resp.Answers.Count == 0 && resp.Authorities.Count == 0 && resp.Additionals.Count == 0)
-                            resp = await DnsClient.Query(req, Roots);
+                        {
+                            resp = await DnsClient.Query(req, "8.8.8.8");
 
+                            OnRecursive?.Invoke(req, resp);
+                        }
                         var output = Writer.Serialize(resp);
-                        endpoint.SendAsync(output, output.Length, client.RemoteEndPoint);
-                    });
+                        await endpoint.SendAsync(output, output.Length, client.RemoteEndPoint);
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
 
 

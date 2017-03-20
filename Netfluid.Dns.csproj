@@ -120,7 +120,7 @@
     <Compile Include="Records\RecordX25.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="Response.cs" />
-    <Compile Include="Serialization\Serializer.cs" />
+    <Compile Include="Serialization\Reader.cs" />
     <Compile Include="Serialization\Writer.cs" />
   </ItemGroup>
   <ItemGroup>

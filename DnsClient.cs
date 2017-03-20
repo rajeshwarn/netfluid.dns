@@ -5,19 +5,22 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using System;
 
 namespace Netfluid.Dns
 {
     public static class DnsClient
     {
+        static Lazy<IPAddress[]> _networkServers = new Lazy<IPAddress[]>(() => NetworkInterface.GetAllNetworkInterfaces()
+                                                                .Where(x => x.OperationalStatus == OperationalStatus.Up)
+                                                                .SelectMany(x => x.GetIPProperties().DnsAddresses)
+                                                                .ToArray());
+
         /// <summary>
         ///     Gets a list of default DNS servers used by system
         /// </summary>
         /// <returns></returns>
-        public static IPAddress[] NetworkServers => NetworkInterface.GetAllNetworkInterfaces()
-                                                                .Where(x => x.OperationalStatus == OperationalStatus.Up)
-                                                                .SelectMany(x => x.GetIPProperties().DnsAddresses)
-                                                                .ToArray();
+        public static IPAddress[] NetworkServers => _networkServers.Value;
 
         /// <summary>
         /// Ask a DNS question to the specified server
@@ -70,6 +73,11 @@ namespace Netfluid.Dns
             return await Query(request, servers);
         }
 
+        public static Task<Response> Query(Request req, string v)
+        {
+            return Query(req, new[] { IPAddress.Parse(v) });
+        }
+
         public static async Task<Response> Query(Request request, IEnumerable<IPAddress> servers)
         {
             var requestByte = Writer.Serialize(request);
@@ -86,7 +94,7 @@ namespace Netfluid.Dns
                         await client.SendAsync(requestByte, requestByte.Length, new IPEndPoint(server, 53));
                         var response = await client.ReceiveAsync();
 
-                        return Serializer.ReadResponse(response.Buffer);
+                        return Reader.ReadResponse(response.Buffer);
                     }
                     catch (SocketException)
                     {

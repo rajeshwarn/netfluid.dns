@@ -54,7 +54,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\netfluid.dns\Netfluid.Dns.csproj">
+    <ProjectReference Include="..\Netfluid.Dns.csproj">
       <Project>{316796bd-c268-4182-9e79-9f85e91f67fa}</Project>
       <Name>Netfluid.Dns</Name>
     </ProjectReference>
