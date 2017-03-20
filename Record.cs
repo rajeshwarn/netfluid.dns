@@ -20,8 +20,6 @@ namespace Netfluid.Dns
             Types = typeof(Record).Assembly.GetTypes().Where(x=>x.Inherit(typeof(Record))).ToArray();
         }
         
-        public string RecordId { get; set; }
-
         /// <summary>
         ///     Specifies type class of resource record, mostly IN but can be CS, CH or HS
         /// </summary>
