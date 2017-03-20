@@ -20,7 +20,7 @@ namespace Netfluid.Dns
         /// </summary>
         public Request()
         {
-            Header = new Header {OPCODE = OPCode.Query, QDCOUNT = 0, RD = true, ID = (ushort) DateTime.Now.Millisecond};
+            Header = new Header {OPCODE = OpCode.Query, QDCOUNT = 0, RD = true, ID = (ushort) DateTime.Now.Millisecond};
         }
 
         /// <summary>

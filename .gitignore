@@ -2,3 +2,15 @@
 /bin/Debug
 /.vs
 /obj
+/Example/bin/Debug/Example.exe
+/Example/bin/Debug/Example.exe.config
+/Example/bin/Debug/Example.pdb
+/Example/bin/Debug/Example.vshost.exe
+/Example/bin/Debug/Example.vshost.exe.config
+/Example/bin/Debug/Example.vshost.exe.manifest
+/Example/bin/Debug/Netfluid.Dns.dll
+/Example/bin/Debug/Netfluid.Dns.pdb
+/Example/obj/Debug/Example.csproj.FileListAbsolute.txt
+/Example/obj/Debug/Example.csprojResolveAssemblyReference.cache
+/Example/obj/Debug/Example.exe
+/Example/obj/Debug/Example.pdb

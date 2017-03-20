@@ -189,9 +189,9 @@ namespace Netfluid.Dns.Records
         /// <summary>
         ///     Specifies kind of query
         /// </summary>
-        public OPCode OPCODE
+        public OpCode OPCODE
         {
-            get { return (OPCode) GetBits(Flags, 11, 4); }
+            get { return (OpCode) GetBits(Flags, 11, 4); }
             set { Flags = SetBits(Flags, 11, 4, (ushort) value); }
         }
 
@@ -243,9 +243,9 @@ namespace Netfluid.Dns.Records
         /// <summary>
         ///     Response code
         /// </summary>
-        public RCode RCode
+        public ResponseCode RCode
         {
-            get { return (RCode) GetBits(Flags, 0, 4); }
+            get { return (ResponseCode) GetBits(Flags, 0, 4); }
             set { Flags = SetBits(Flags, 0, 4, (ushort) value); }
         }
 
