@@ -41,12 +41,12 @@ namespace Netfluid.Dns
         /// <summary>
         /// Implement this function to fill the response
         /// </summary>
-        public Func<Request, Response> OnRequest;
+        public Func<Request, Response> OnRequest { get; set; }
 
         /// <summary>
         /// If true when a local server response is empty it will hask to roots servers
         /// </summary>
-        public bool Recursive;
+        public bool Recursive { get; set; }
 
         CancellationTokenSource stopper;
         UdpClient endpoint;
@@ -93,6 +93,7 @@ namespace Netfluid.Dns
         /// <param name="ip"></param>
         public void StartAsync()
         {
+            AcceptingRequest = true;
             task.Start();
         }
 
