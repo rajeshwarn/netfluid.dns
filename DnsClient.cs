@@ -84,6 +84,10 @@ namespace Netfluid.Dns
             var buffer = new byte[32 * 1024];
 
             var client = new UdpClient();
+            client.AllowNatTraversal(true);
+            client.DontFragment = true;
+            client.Client.ReceiveTimeout = 2000;
+            client.Client.SendTimeout = 2000;
 
             for (int intAttempts = 0; intAttempts < 3; intAttempts++)
             {
@@ -99,6 +103,10 @@ namespace Netfluid.Dns
                     catch (SocketException)
                     {
                         continue; // next try
+                    }
+                    catch (Exception ex)
+                    {
+
                     }
                 }
             }

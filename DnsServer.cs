@@ -1,5 +1,7 @@
 ﻿using Netfluid.Dns.Serialization;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -34,6 +36,8 @@ namespace Netfluid.Dns
 
         public static IPAddress[] Roots => _roots.Value;
 
+        public IEnumerable<IPAddress> RecursiveChain { get; set; } = new[] { IPAddress.Parse("8.8.8.8") };
+
         /// <summary>
         /// True if DNS Server is running
         /// </summary>
@@ -57,6 +61,7 @@ namespace Netfluid.Dns
         CancellationTokenSource stopper;
         UdpClient endpoint;
         Task task;
+        System.Timers.Timer timer;
 
         public DnsServer():this(IPAddress.Any)
         {
@@ -65,9 +70,12 @@ namespace Netfluid.Dns
         public DnsServer(IPAddress ip, int port=53)
         {
             endpoint = new UdpClient(new IPEndPoint(ip, port));
-            stopper = new CancellationTokenSource();
-            
+            endpoint.AllowNatTraversal(true);
+            endpoint.DontFragment = true;
+            endpoint.Client.ReceiveTimeout = 2000;
+            endpoint.Client.SendTimeout = 2000;
 
+            stopper = new CancellationTokenSource();
             task = new Task(async () =>
             {
                 while (true)
@@ -76,6 +84,7 @@ namespace Netfluid.Dns
                     {
                         var client = await endpoint.ReceiveAsync();
 
+
                         if (OnRequest == null) return;
 
                         var req = Reader.ReadRequest(new MemoryStream(client.Buffer));
@@ -83,7 +92,7 @@ namespace Netfluid.Dns
 
                         if (Recursive && resp.Answers.Count == 0 && resp.Authorities.Count == 0 && resp.Additionals.Count == 0)
                         {
-                            resp = await DnsClient.Query(req, "8.8.8.8");
+                            resp = await DnsClient.Query(req, RecursiveChain);
 
                             OnRecursive?.Invoke(req, resp);
                         }
@@ -94,15 +103,22 @@ namespace Netfluid.Dns
                     {
                     }
                 }
-
-
             }, stopper.Token);
         }
 
         /// <summary>
         /// Start local DNS Server
         /// </summary>
-        /// <param name="ip"></param>
+        public void Start()
+        {
+            task.Start();
+            task.Wait();
+        }
+
+
+        /// <summary>
+        /// Start local DNS Server
+        /// </summary>
         public void StartAsync()
         {
             AcceptingRequest = true;

@@ -2,13 +2,7 @@
 
 namespace Netfluid.Dns
 {
-    /*
- * http://www.iana.org/assignments/dns-parameters
- * 
- * 
- * 
- */
-
+    ///http://www.iana.org/assignments/dns-parameters
 
     /*
 	 * 3.2.2. TYPE values

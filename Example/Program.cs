@@ -1,6 +1,8 @@
 ﻿using Netfluid.Dns;
 using Netfluid.Dns.Records;
 using System;
+using System.Net;
+using System.Threading;
 
 namespace Example
 {
@@ -15,6 +17,7 @@ namespace Example
             //If he doens't have the answer it will ask to upper dns server for solving the question
             server.Recursive = true;
             server.OnRecursive += Server_OnRecursive;
+            server.RecursiveChain = new[] { IPAddress.Parse("192.127.35.30") };
 
             server.OnRequest = OnRequest;
             server.StartAsync();
